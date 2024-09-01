@@ -32,35 +32,72 @@ function App() {
     return () => clearInterval(interval);
   }, [gameTick]);
 
-  const handleInput = useCallback(() => {
-    if (gameEngine) {
-      if (gameState.gameOver) {
-        gameEngine.reset();
-      } else {
-        gameEngine.jump();
+  const handleKeyDown = useCallback((event) => {
+    if (gameEngine && !gameState.gameOver) {
+      switch (event.code) {
+        case 'ArrowUp':
+        case 'Space':
+          gameEngine.swim();
+          break;
+        case 'ArrowDown':
+          gameEngine.move('down');
+          break;
+        case 'ArrowLeft':
+          gameEngine.move('left');
+          break;
+        case 'ArrowRight':
+          gameEngine.move('right');
+          break;
+      }
+      setGameState(gameEngine.getState());
+    }
+  }, [gameEngine, gameState]);
+
+  const handleKeyUp = useCallback((event) => {
+    if (gameEngine && !gameState.gameOver) {
+      switch (event.code) {
+        case 'ArrowLeft':
+        case 'ArrowRight':
+          gameEngine.stopMove(event.code === 'ArrowLeft' ? 'left' : 'right');
+          break;
+        // We don't handle up/down key up events as vertical movement is controlled by gravity and swim
       }
       setGameState(gameEngine.getState());
     }
   }, [gameEngine, gameState]);
 
   useEffect(() => {
-    const handleKeyPress = (event) => {
-      if (event.code === 'Space') {
-        handleInput();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
     return () => {
-      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [handleInput]);
+  }, [handleKeyDown, handleKeyUp]);
+
+  const handleClick = useCallback(() => {
+    if (gameEngine) {
+      if (gameState.gameOver) {
+        gameEngine.reset();
+      } else {
+        gameEngine.swim();
+      }
+      setGameState(gameEngine.getState());
+    }
+  }, [gameEngine, gameState]);
 
   if (!gameState) return null;
 
   return (
-    <div className="App" onClick={handleInput}>
-      <div className="fish" style={{ top: `${gameState.fishPosition}px`, left: `${gameEngine.FISH_LEFT}px` }}>
+    <div className="App" onClick={handleClick}>
+      <div 
+        className="fish" 
+        style={{ 
+          top: `${gameState.fishY}px`, 
+          left: `${gameState.fishX}px`,
+          transform: `rotate(${gameEngine.velocityY * 3}deg)`
+        }}
+      >
         <div className="fish-eye"></div>
         <div className="fish-tail"></div>
       </div>
@@ -77,7 +114,7 @@ function App() {
       <div className="score">Score: {gameState.score}</div>
       {!gameState.gameHasStarted && <div className="message">Click to start</div>}
       {gameState.gameOver && <div className="message">Game Over! Click to restart</div>}
-      <button className="jump-button" onClick={handleInput}>Swim Up</button>
+      <button className="jump-button" onClick={() => gameEngine.jump()}>Swim Up</button>
     </div>
   );
 }

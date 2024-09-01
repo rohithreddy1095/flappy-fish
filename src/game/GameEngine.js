@@ -1,21 +1,38 @@
 export class GameEngine {
   constructor(windowHeight) {
     this.windowHeight = windowHeight;
-    this.fishPosition = 200;
+    this.FISH_WIDTH = 60;
+    this.FISH_HEIGHT = 30;
+    this.PIPE_WIDTH = 70;
+    this.FISH_START_X = 50;
+    this.fishX = this.FISH_START_X;
+    this.fishY = 200;
+    this.velocityX = 0;
+    this.velocityY = 0;
+    this.gravity = 0.4;
+    this.swimStrength = -7;
+    this.maxSpeed = 5;
     this.pipes = [];
     this.score = 0;
     this.gameHasStarted = false;
     this.gameOver = false;
-    this.FISH_WIDTH = 60;
-    this.FISH_HEIGHT = 30;
-    this.PIPE_WIDTH = 70;
-    this.FISH_LEFT = 50;
   }
 
   tick() {
     if (this.gameHasStarted && !this.gameOver) {
-      // Move fish
-      this.fishPosition = Math.min(this.fishPosition + 2, this.windowHeight - this.FISH_HEIGHT);
+      // Apply gravity
+      this.velocityY += this.gravity;
+
+      // Limit vertical speed
+      this.velocityY = Math.max(Math.min(this.velocityY, this.maxSpeed), -this.maxSpeed);
+
+      // Update fish position
+      this.fishX += this.velocityX;
+      this.fishY += this.velocityY;
+
+      // Constrain fish within screen bounds
+      this.fishX = Math.max(0, Math.min(this.fishX, window.innerWidth - this.FISH_WIDTH));
+      this.fishY = Math.max(0, Math.min(this.fishY, this.windowHeight - this.FISH_HEIGHT));
 
       // Update pipes
       const speed = 2 * (1 + Math.min(this.score / 10, 4));
@@ -34,20 +51,11 @@ export class GameEngine {
       }
 
       // Check collisions
-      const fishRight = this.FISH_LEFT + this.FISH_WIDTH;
-      const fishTop = this.fishPosition;
-      const fishBottom = this.fishPosition + this.FISH_HEIGHT;
-
       for (const pipe of this.pipes) {
-        const pipeLeft = pipe.left;
-        const pipeRight = pipe.left + this.PIPE_WIDTH;
-        const topPipeBottom = pipe.topHeight;
-        const bottomPipeTop = this.windowHeight - pipe.bottomHeight;
-
         if (
-          fishRight > pipeLeft &&
-          this.FISH_LEFT < pipeRight &&
-          (fishTop < topPipeBottom || fishBottom > bottomPipeTop)
+          this.fishX + this.FISH_WIDTH > pipe.left &&
+          this.fishX < pipe.left + this.PIPE_WIDTH &&
+          (this.fishY < pipe.topHeight || this.fishY + this.FISH_HEIGHT > this.windowHeight - pipe.bottomHeight)
         ) {
           this.gameOver = true;
           return;
@@ -55,11 +63,65 @@ export class GameEngine {
       }
 
       // Update score
-      if (this.pipes.length > 0 && 
-          this.pipes[0].left + this.PIPE_WIDTH < this.FISH_LEFT && 
-          this.pipes[0].left + this.PIPE_WIDTH >= this.FISH_LEFT - speed) {
+      this.updateScore(speed);
+
+      // ... (rest of the method remains the same)
+    }
+  }
+
+  updateScore(speed) {
+    const fishRightEdge = this.fishX + this.FISH_WIDTH;
+    for (let i = 0; i < this.pipes.length; i++) {
+      const pipe = this.pipes[i];
+      const pipeRightEdge = pipe.left + this.PIPE_WIDTH;
+      
+      if (!pipe.passed && fishRightEdge > pipeRightEdge) {
         this.score++;
+        pipe.passed = true;
+        break;  // Only increment score once per frame
       }
+      
+      // Remove passed property from pipes that are no longer on screen
+      if (pipe.left + this.PIPE_WIDTH < 0) {
+        delete pipe.passed;
+      }
+    }
+  }
+
+  swim() {
+    if (!this.gameHasStarted) {
+      this.gameHasStarted = true;
+    }
+    if (!this.gameOver) {
+      this.velocityY = this.swimStrength;
+    }
+  }
+
+  move(direction) {
+    const speed = 3;
+    switch (direction) {
+      case 'up':
+        this.swim();
+        break;
+      case 'down':
+        this.velocityY = speed;
+        break;
+      case 'left':
+        this.velocityX = -speed;
+        break;
+      case 'right':
+        this.velocityX = speed;
+        break;
+    }
+  }
+
+  stopMove(direction) {
+    switch (direction) {
+      case 'left':
+      case 'right':
+        this.velocityX = 0;
+        break;
+      // We don't stop vertical movement here, as it's controlled by gravity and swim
     }
   }
 
@@ -68,21 +130,25 @@ export class GameEngine {
       this.gameHasStarted = true;
     }
     if (!this.gameOver) {
-      this.fishPosition = Math.max(0, this.fishPosition - 60);
+      this.velocityY = this.jumpStrength;
     }
   }
 
   reset() {
     this.gameHasStarted = false;
     this.gameOver = false;
-    this.fishPosition = 200;
+    this.fishX = this.FISH_START_X;
+    this.fishY = 200;
+    this.velocityX = 0;
+    this.velocityY = 0;
     this.pipes = [];
     this.score = 0;
   }
 
   getState() {
     return {
-      fishPosition: this.fishPosition,
+      fishX: this.fishX,
+      fishY: this.fishY,
       pipes: this.pipes,
       score: this.score,
       gameHasStarted: this.gameHasStarted,

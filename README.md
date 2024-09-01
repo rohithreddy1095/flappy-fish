@@ -8,11 +8,21 @@ In Flappy Fish, players control a fish swimming through an underwater world fill
 
 ## Features
 
-- Simple one-touch controls
+- Simple one-touch controls for swimming up
+- Arrow key controls for multi-directional movement
 - Progressively increasing difficulty
 - Score tracking
 - Responsive design for various screen sizes
 - Separate game engine for improved code organization
+
+## Controls
+
+- Click, tap, or press Space to swim upwards
+- Use arrow keys for more precise control:
+  - Up arrow: Swim upwards
+  - Down arrow: Swim downwards faster
+  - Left arrow: Move left
+  - Right arrow: Move right
 
 ## Getting Started
 
@@ -47,7 +57,7 @@ In Flappy Fish, players control a fish swimming through an underwater world fill
 
 2. Open your browser and go to `http://localhost:3000`
 
-3. The game should now be running in your browser. Click, tap, or press the spacebar to make the fish swim upwards and avoid obstacles!
+3. The game should now be running in your browser. Use the controls described above to play!
 
 ### Building for Production
 
