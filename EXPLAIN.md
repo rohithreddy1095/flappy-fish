@@ -4,29 +4,38 @@ This document provides a technical overview of the Flappy Fish game, explaining 
 
 ## Project Architecture
 
-The Flappy Fish game is built using React and JavaScript, with the main game logic implemented directly in the App component. The project structure is simple, with a single main component handling all the game logic.
+The Flappy Fish game is built using React and JavaScript, with the game logic separated into a GameEngine class. The project structure consists of a main App component that interacts with the GameEngine to manage the game state and rendering.
 
 ## Component Breakdown
 
 ### App (App.js)
 
-The App component is the core of the application, handling all game logic, rendering, and state management.
+The App component is the core of the application, handling rendering and user input.
+
+Key features:
+- Initializes and interacts with the GameEngine
+- Manages game rendering based on the state from GameEngine
+- Handles user input (click, touch, spacebar press)
+- Renders all game elements (fish, pipes, score, messages)
+
+### GameEngine (GameEngine.js)
+
+The GameEngine class encapsulates all the game logic.
 
 Key features:
 - Manages game state (not started, playing, game over)
 - Handles fish movement and pipe generation
 - Implements collision detection
 - Manages score
-- Renders all game elements (fish, pipes, score, messages)
 
 ## Game Logic
 
-The main game logic is implemented in the App component:
+The main game logic is implemented in the GameEngine class:
 
-1. Game Loop: The game uses setInterval to create a game tick that runs every 24ms.
+1. Game Loop: The App component uses setInterval to create a game tick that calls the GameEngine's tick method every 24ms.
 
 2. Fish Movement:
-   - The fish's vertical position is updated based on user input (click, touch, or spacebar press).
+   - The fish's vertical position is updated based on user input (handled in the App component).
    - Gravity is simulated by incrementing the fish's vertical position each game tick.
 
 3. Pipe Generation:
@@ -45,19 +54,21 @@ The main game logic is implemented in the App component:
 
 ## State Management
 
-The game uses React's useState and useEffect hooks for state management and side effects:
+The game uses React's useState and useEffect hooks for state management and side effects in the App component:
 
-- useState: Manages game state, score, fish position, and pipe positions.
+- useState: Manages the GameEngine instance and the current game state.
 - useEffect: 
   - Sets up the game loop interval
   - Handles window resizing
   - Sets up and cleans up event listeners for keyboard input
 
+The GameEngine class manages its own internal state, which is accessed by the App component through the getState method.
+
 ## Responsive Design
 
 The game is designed to be responsive, adapting to different screen sizes:
 
-- Window height is tracked and updated on resize.
+- Window height is tracked and updated on resize, and passed to the GameEngine.
 - Game objects and speeds are scaled relative to the window height.
 
 ## User Input
@@ -67,6 +78,8 @@ The game responds to multiple input methods:
 - Touch events (for mobile devices)
 - Spacebar key press
 
+These inputs are handled in the App component and communicated to the GameEngine.
+
 ## Rendering
 
 The game uses CSS for rendering game objects:
@@ -75,4 +88,4 @@ The game uses CSS for rendering game objects:
 
 ## Conclusion
 
-Flappy Fish demonstrates the use of React hooks and CSS to create an interactive game. While it doesn't use Canvas or separate components as initially described, it showcases how a simple game can be built entirely within a single React component.
+Flappy Fish demonstrates the use of React hooks and a separate game engine class to create an interactive game. This architecture separates concerns, with the App component handling rendering and input, while the GameEngine manages the game logic and state.

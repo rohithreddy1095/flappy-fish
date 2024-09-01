@@ -12,8 +12,7 @@ In Flappy Fish, players control a fish swimming through an underwater world fill
 - Progressively increasing difficulty
 - Score tracking
 - Responsive design for various screen sizes
-- Sound effects and background music
-- Local storage for high score
+- Separate game engine for improved code organization
 
 ## Getting Started
 
