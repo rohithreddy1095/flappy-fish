@@ -16,7 +16,8 @@ Key features:
 - Initializes and interacts with the GameEngine
 - Manages game rendering based on the state from GameEngine
 - Handles user input (click, touch, spacebar press, arrow keys)
-- Renders all game elements (fish, pipes, score, messages)
+- Renders all game elements (fish, pipes, bubbles, score, messages)
+- Manages sound effects
 
 ### GameEngine (GameEngine.js)
 
@@ -28,6 +29,7 @@ Key features:
 - Implements pipe generation and movement
 - Manages collision detection
 - Handles scoring system
+- Generates and updates bubble animations
 
 ## Game Logic
 
@@ -61,17 +63,26 @@ The main game logic is implemented in the GameEngine class:
 6. Difficulty Progression:
    - The game's difficulty increases over time by increasing pipe speed and narrowing gaps.
 
+7. Bubble Animation:
+   - Bubbles are generated randomly and move upwards.
+   - Bubbles are created with varying sizes and speeds.
+   - Bubbles are removed when they move off-screen.
+
+8. Sound Effects:
+   - A sound effect is played when the fish successfully passes through a pipe.
+
 ## State Management
 
 The game uses React's useState and useEffect hooks for state management and side effects in the App component:
 
-- useState: Manages the GameEngine instance and the current game state.
+- useState: Manages the GameEngine instance, the current game state, and the previous score (for sound effect triggering)
 - useEffect: 
   - Sets up the game loop interval
   - Handles window resizing
-  - Sets up and cleans up event listeners for keyboard input (now including all arrow keys)
+  - Sets up and cleans up event listeners for keyboard input
+  - Manages sound effect playback
 
-The GameEngine class manages its own internal state, which is accessed by the App component through the getState method. This state now includes additional properties for multi-directional movement.
+The GameEngine class manages its own internal state, which is accessed by the App component through the getState method. This state now includes additional properties for bubbles.
 
 ## User Input
 
@@ -89,7 +100,12 @@ The game uses CSS for rendering game objects:
 - The fish is created using CSS shapes and positioned absolutely.
 - Pipes are div elements with CSS styling to create the appearance of seaweed or coral.
 - The fish's rotation is adjusted based on its vertical velocity for a more dynamic appearance.
+- Bubbles are rendered as div elements with CSS animations for movement and scaling.
+
+## Sound Effects
+
+The game uses the Web Audio API to play a sound effect when the fish passes through a pipe. The sound is loaded as an audio file and played using an Audio object.
 
 ## Conclusion
 
-Flappy Fish demonstrates the use of React hooks and a separate game engine class to create an interactive game. This architecture separates concerns, with the App component handling rendering and input, while the GameEngine manages the game logic and state. The addition of multi-directional controls adds depth to the gameplay while maintaining the core challenge of navigating through obstacles.
+Flappy Fish demonstrates the use of React hooks and a separate game engine class to create an interactive game. This architecture separates concerns, with the App component handling rendering, input, and sound, while the GameEngine manages the game logic and state. The addition of bubble animations and sound effects enhances the game's atmosphere, providing a more immersive underwater experience.

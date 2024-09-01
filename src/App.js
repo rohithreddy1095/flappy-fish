@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
 import { GameEngine } from './game/GameEngine';
+import bubbleSound from './assets/bubble-sound.mp3'; // Make sure to add this sound file
 
 function App() {
   const [gameEngine, setGameEngine] = useState(null);
   const [gameState, setGameState] = useState(null);
   const windowHeight = useRef(window.innerHeight);
+  const [prevScore, setPrevScore] = useState(0);
+  const audioRef = useRef(new Audio(bubbleSound));
 
   useEffect(() => {
     const engine = new GameEngine(windowHeight.current);
@@ -86,6 +89,13 @@ function App() {
     }
   }, [gameEngine, gameState]);
 
+  useEffect(() => {
+    if (gameState && gameState.score > prevScore) {
+      audioRef.current.play();
+      setPrevScore(gameState.score);
+    }
+  }, [gameState, prevScore]);
+
   if (!gameState) return null;
 
   return (
@@ -114,7 +124,19 @@ function App() {
       <div className="score">Score: {gameState.score}</div>
       {!gameState.gameHasStarted && <div className="message">Click to start</div>}
       {gameState.gameOver && <div className="message">Game Over! Click to restart</div>}
-      <button className="jump-button" onClick={() => gameEngine.jump()}>Swim Up</button>
+      
+      {gameState.bubbles.map((bubble, index) => (
+        <div
+          key={index}
+          className="bubble"
+          style={{
+            left: `${bubble.left}px`,
+            top: `${bubble.top}px`,
+            width: `${bubble.size}px`,
+            height: `${bubble.size}px`,
+          }}
+        />
+      ))}
     </div>
   );
 }

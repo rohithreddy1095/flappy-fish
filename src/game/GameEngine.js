@@ -16,6 +16,7 @@ export class GameEngine {
     this.score = 0;
     this.gameHasStarted = false;
     this.gameOver = false;
+    this.bubbles = [];
   }
 
   tick() {
@@ -64,6 +65,9 @@ export class GameEngine {
 
       // Update score
       this.updateScore(speed);
+
+      // Update bubbles
+      this.updateBubbles();
 
       // ... (rest of the method remains the same)
     }
@@ -145,6 +149,27 @@ export class GameEngine {
     this.score = 0;
   }
 
+  createBubble() {
+    const bubble = {
+      left: Math.random() * window.innerWidth,
+      top: this.windowHeight + 20, // Start from below the screen
+      size: Math.random() * 20 + 10,
+      speed: Math.random() * 2 + 1,
+    };
+    this.bubbles.push(bubble);
+  }
+
+  updateBubbles() {
+    this.bubbles = this.bubbles.filter(bubble => bubble.top > -bubble.size);
+    this.bubbles.forEach(bubble => {
+      bubble.top -= bubble.speed;
+    });
+
+    if (Math.random() < 0.05) { // Adjust this value to control bubble frequency
+      this.createBubble();
+    }
+  }
+
   getState() {
     return {
       fishX: this.fishX,
@@ -153,6 +178,7 @@ export class GameEngine {
       score: this.score,
       gameHasStarted: this.gameHasStarted,
       gameOver: this.gameOver,
+      bubbles: this.bubbles,
     };
   }
 }
